@@ -16,8 +16,9 @@ spec:
     spec:
       containers:
       - name: expense-app
-        # Replace 'your-dockerhub-username' with actual registry
-        image: your-dockerhub-username/expense-app:latest 
+        # Image from GitHub Container Registry
+        image: ghcr.io/${{ github.repository_owner }}/eye-spend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8501
         resources:
@@ -30,6 +31,11 @@ spec:
         env:
         - name: ENV
           value: "production"
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: api-key
 ---
 apiVersion: v1
 kind: Service
