@@ -74,7 +74,8 @@ jobs:
         # Replace the placeholder in the manifest with the actual image name (lowercase)
         # We need to ensure the repository owner part is lowercase for the image URL
         REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-        sed -i "s|\${{ github.repository_owner }}|$REPO_OWNER|g" k8s_deployment.yaml
+        IMAGE_URL="ghcr.io/$REPO_OWNER/eye-spend:latest"
+        sed -i "s|REPLACE_ME_IMAGE|$IMAGE_URL|g" k8s_deployment.yaml
         
         kubectl apply -f k8s_deployment.yaml -n redkom-dev
         
