@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    # Use the Dockerfile in the current directory ('.') to build the image
+    build: .
+    # Map the container's port 8501 to your local machine's port 8501
+    ports:
+      - "8501:8501"
+    # Mount the current directory into the container
+    # This allows you to edit app.py locally and see the changes automatically
+    volumes:
+      - .:/app
+    # Set the restart policy
+    restart: always
