@@ -5,6 +5,8 @@ from datetime import datetime
 import json
 import base64 # Added for image embedding
 import os # Added for file path checking
+import google.generativeai as genai
+from PIL import Image
 
 # --- CONFIGURATION & STYLING ---
 st.set_page_config(
@@ -125,51 +127,75 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # --- AI INTEGRATION LOGIC (MOCKED FOR DEMO STABILITY) ---
 def analyze_receipt_with_ai(uploaded_image):
     """
-    Simulates sending the image to an LLM (like Gemini Vision) for OCR and risk analysis.
-    (Using the user's random mock logic for high variability)
+    Sends the image to Google Gemini Flash for OCR and risk analysis.
     """
-    import time
-    time.sleep(1.5)
-    
-    # Mock Response Logic based on "random" to show variety (User's logic)
-    mock_vendors = ["Starbucks Coffee", "Uber Rides", "Gaming Emporium (Casino)", "Office Depot", "Delta Airlines", "Global Tech Solutions"]
-    vendor = random.choice(mock_vendors)
-    amount = round(random.uniform(5.00, 1500.00), 2)
-    
-    # Override for specific demo scenarios
-    if vendor == "Global Tech Solutions":
-        amount = 4200.00 # High value demo case
+    api_key = os.environ.get("API_KEY")
+    if not api_key:
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except:
+            pass
+            
+    if not api_key:
+        st.error("API Key not found. Please set API_KEY in environment or GEMINI_API_KEY in .streamlit/secrets.toml")
+        return {
+            "vendor": "Unknown",
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "amount": 0.00,
+            "category": "Uncategorized",
+            "risk_score": 0,
+            "risk_reason": "API Key missing."
+        }
 
-    # AI Logic: Flag suspicious items (Anomaly Detection)
-    risk_score = 10
-    risk_reason = "Standard transaction, category matches vendor."
-    category = "Travel & Meals"
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
 
-    if "Casino" in vendor:
-        risk_score = 95
-        risk_reason = "🚨 HIGH RISK: Gambling establishment detected. Requires HR review per Section 3.1."
-        category = "Entertainment"
-    elif amount > 300 and "Starbucks" in vendor:
-        risk_score = 85
-        risk_reason = "SUSPICIOUS: Unusually high amount ($300+) for a meal/coffee expense."
-        category = "Meals"
-    elif amount > 1000:
-        risk_score = 65
-        risk_reason = f"Medium Risk: Expense of ${amount:,.2f} exceeds the $1,000 threshold. Manager approval required."
-        if amount > 4000:
-             risk_score = 95
-             risk_reason = f"🚨 CRITICAL: Expense of ${amount:,.2f} exceeds the $1,000 auto-approval limit. Executive sign-off required."
+        # Convert UploadedFile to PIL Image
+        image = Image.open(uploaded_image)
+
+        prompt = """
+        Analyze this receipt image and extract the following details into a JSON object:
+        - vendor: The name of the merchant.
+        - date: The date of the transaction in YYYY-MM-DD format. If not found, use today's date.
+        - amount: The total amount of the transaction as a number (float).
+        - category: The expense category (e.g., Meals, Travel, Office Supplies, Entertainment, Software, Groceries).
+        - risk_score: A score from 0 to 100 indicating the risk level of this expense (0 is safe, 100 is high risk).
+            - High risk (80+): Alcohol, Casinos, Personal items, unusually high amounts for the category.
+            - Medium risk (50-79): Weekend transactions, missing details.
+            - Low risk (0-49): Standard business expenses.
+        - risk_reason: A brief explanation for the assigned risk score.
+
+        Return ONLY the raw JSON string, no markdown formatting.
+        """
+
+        response = model.generate_content([prompt, image])
         
-        category = "IT Infrastructure" if "Global Tech" in vendor else ("Software" if "Office Depot" in vendor else category)
-    
-    return {
-        "vendor": vendor,
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "amount": amount,
-        "category": category,
-        "risk_score": risk_score,
-        "risk_reason": risk_reason
-    }
+        # Clean up response text if it contains markdown code blocks
+        response_text = response.text.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+            
+        data = json.loads(response_text)
+        
+        # Ensure data types
+        data['amount'] = float(data.get('amount', 0.0))
+        data['risk_score'] = int(data.get('risk_score', 0))
+        
+        return data
+
+    except Exception as e:
+        st.error(f"Error analyzing receipt: {e}")
+        return {
+            "vendor": "Error",
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "amount": 0.00,
+            "category": "Error",
+            "risk_score": 0,
+            "risk_reason": f"Analysis failed: {str(e)}"
+        }
 
 def get_financial_advice_and_prediction(df_history):
     """
@@ -229,6 +255,12 @@ with st.sidebar:
     st.subheader("System Status")
     import os
     api_key = os.environ.get("API_KEY")
+    if not api_key:
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except:
+            pass
+            
     if api_key:
         st.success("AI Model (Gemini Vision) Online 🟢")
         st.caption("Secure API Key Loaded")
