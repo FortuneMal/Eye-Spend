@@ -162,6 +162,36 @@ def analyze_receipt_with_ai(uploaded_image):
         "risk_score": risk_score,
         "risk_reason": risk_reason
     }
+def analyze_receipt_with_ai(uploaded_image):
+    """
+    Simulates sending the image to an LLM (like Gemini Vision) for OCR and risk analysis.
+    UPDATED: Simulating a HIGH VALUE receipt scan.
+    """
+    import time
+    time.sleep(1.5)
+    
+    # --- MOCK OCR EXTRACTION (Updated for the $4,200 receipt) ---
+    vendor = "Global Tech Solutions"
+    amount = 4200.00  # High amount!
+    category = "IT Infrastructure"
+
+    # --- MOCK ANOMALY DETECTION (AI Logic) ---
+    risk_score = 15
+    risk_reason = "Standard expense."
+
+    # Logic to flag the high amount
+    if amount > 1000:
+        risk_score = 95 # High Risk Score
+        risk_reason = f"🚨 CRITICAL: Expense of ${amount:,.2f} exceeds the $1,000 auto-approval limit. Executive sign-off required."
+    
+    return {
+        "vendor": vendor,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "amount": amount,
+        "category": category,
+        "risk_score": risk_score,
+        "risk_reason": risk_reason
+    }
 
 def get_financial_advice_and_prediction(df_history):
     """
