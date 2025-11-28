@@ -13,6 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
+# OpenShift/Kubernetes Permission Fix:
+# Allow the random UID (group 0) to write to the app directory
+ENV HOME=/app
+RUN chgrp -R 0 /app && chmod -R g=u /app
+
 # Expose the port Streamlit runs on
 EXPOSE 8501
 
