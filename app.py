@@ -374,7 +374,7 @@ st.markdown(f"""
                 - **Policy Check:** Passed all checks except for amount threshold.
                 - **Time of Day:** Normal business hours.
                 - **Location Match:** Geo-location (if available) did not match. (MOCK)
-                """)
+                            """)
                 col_btn1, col_btn2 = st.columns([1,1])
                 with col_btn1:
                     if approval_action != "Auto-Reject":
