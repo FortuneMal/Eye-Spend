@@ -3,6 +3,8 @@ import pandas as pd
 import random
 from datetime import datetime
 import json
+import base64 # New import for image embedding
+import os # New import for file path checking
 
 # --- CONFIGURATION & STYLING ---
 st.set_page_config(
@@ -11,71 +13,110 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --------------------------------------------------------
+# 🎯 LOGO INTEGRATION: Using Base64 Encoding
+# --------------------------------------------------------
+LOGO_PATH = "./Assets/NewISpend.png" # Path relative to the app.py file
+
+def get_base64_image(path):
+    """Reads the image file and returns a Base64 data URL string."""
+    try:
+        # Check if the file exists before attempting to open it
+        if not os.path.exists(path):
+            st.warning(f"Logo file not found at {path}. Using placeholder.")
+            # Fallback URL if the file is not found (useful for environments where file copy failed)
+            return "https://placehold.co/50x50/58a6ff/0d1117?text=iS" 
+
+        with open(path, "rb") as image_file:
+            # Encode the image data to base64 and create the data URL
+            base64_data = base64.b64encode(image_file.read()).decode()
+            return f"data:image/png;base64,{base64_data}"
+    except Exception as e:
+        st.error(f"Error loading logo: {e}. Using placeholder.")
+        return "https://placehold.co/50x50/58a6ff/0d1117?text=iS"
+
+LOGO_URL = get_base64_image(LOGO_PATH) 
+
 # Custom CSS for a dark, professional, and interactive look
-custom_css = """
+custom_css = f"""
 <style>
     /* General Styling for Dark Theme */
-    .stApp {
+    .stApp {{
         background-color: #0d1117; /* Dark background (GitHub Dark Mode) */
         color: #c9d1d9; /* Light text */
-    }
+    }}
 
     /* Primary Container Styling (for cards) */
-    .stContainer, .stAlert, .stButton>button, [data-testid="stSidebar"] {
+    .stContainer, .stAlert, .stButton>button, [data-testid="stSidebar"] {{
         background-color: #161b22; /* Slightly lighter dark card background */
         border-radius: 12px;
         border: 1px solid #30363d;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-    }
+    }}
 
     /* Header/Title */
-    h1 {
+    h1 {{
         color: #58a6ff; /* Blue accent for titles */
-        border-bottom: 2px solid #30363d;
         padding-bottom: 10px;
-    }
+        margin-top: 0; /* Adjust margin to align with logo */
+    }}
+    
+    /* Logo Container Styling (for the top bar) */
+    .header-container {{
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #30363d; /* Separator line */
+    }}
+    .logo-img {{
+        border-radius: 8px;
+        border: 2px solid #58a6ff;
+        object-fit: cover;
+    }}
+
 
     /* Metric Boxes Enhancement */
-    [data-testid="stMetric"] {
+    [data-testid="stMetric"] {{
         background-color: #161b22;
         padding: 15px;
         border-radius: 10px;
         border-left: 5px solid #58a6ff;
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
+    }}
     
     /* Risk Status Coloring */
-    .risk-high {
+    .risk-high {{
         color: #f85149; /* Red for high risk */
         font-weight: bold;
-    }
-    .risk-medium {
+    }}
+    .risk-medium {{
         color: #fcd95c; /* Yellow for medium risk */
         font-weight: bold;
-    }
-    .risk-low {
+    }}
+    .risk-low {{
         color: #3fb950; /* Green for low risk */
         font-weight: bold;
-    }
+    }}
     /* Coaching Accent */
-    .coaching-tip {
+    .coaching-tip {{
         border-left: 4px solid #3fb950;
         padding: 10px 15px;
         margin: 15px 0;
         background-color: #1f2937;
         border-radius: 8px;
-    }
+    }}
 
     /* Button Hover Effect */
-    .stButton>button:hover {
+    .stButton>button:hover {{
         border-color: #58a6ff;
         color: #58a6ff;
-    }
+    }}
     
     /* Progress Bar Customization */
-    .stProgress > div > div > div > div {
+    .stProgress > div > div > div > div {{
         background-color: #58a6ff;
-    }
+    }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
@@ -85,33 +126,28 @@ st.markdown(custom_css, unsafe_allow_html=True)
 def analyze_receipt_with_ai(uploaded_image):
     """
     Simulates sending the image to an LLM (like Gemini Vision) for OCR and risk analysis.
-    This is where the actual LLM API call for vision, OCR, and risk assessment would go.
+    The logic below is now updated to prioritize realistic OCR simulation (Tech Haven)
+    when a file is uploaded, and then apply AI risk rules.
     """
     import time
     time.sleep(1.5)
     
-    # Mock Response Logic based on "random" to show variety
-    mock_vendors = ["Starbucks Coffee", "Uber Rides", "Gaming Emporium (Casino)", "Office Depot", "Delta Airlines"]
-    vendor = random.choice(mock_vendors)
-    amount = round(random.uniform(5.00, 1500.00), 2)
-    
-    # AI Logic: Flag suspicious items (Anomaly Detection)
-    risk_score = 10
-    risk_reason = "Standard transaction, category matches vendor."
-    category = "Travel & Meals"
+    # --- MOCK OCR EXTRACTION (Now predictable based on a sample receipt) ---
+    vendor = "Tech Haven Electronics"
+    amount = 110.67 
+    category = "Office Supplies & Equipment"
 
-    if "Casino" in vendor:
-        risk_score = 95
-        risk_reason = "🚨 HIGH RISK: Gambling establishment detected. Requires HR review per Section 3.1."
-        category = "Entertainment"
-    elif amount > 300 and "Starbucks" in vendor:
-        risk_score = 85
-        risk_reason = "SUSPICIOUS: Unusually high amount ($300+) for a meal/coffee expense."
-        category = "Meals"
-    elif amount > 1000:
+    # --- MOCK ANOMALY DETECTION (AI Logic) ---
+    risk_score = 15
+    risk_reason = "Standard expense for office equipment. Low risk."
+
+    # Introduce a predictable high-risk scenario for demonstration
+    if amount > 1000:
         risk_score = 65
-        risk_reason = "Medium Risk: Exceeds $1000 threshold. Manager approval required."
-        category = "Software" if "Office Depot" in vendor else category
+        risk_reason = "Medium Risk: Exceeds $1000 threshold for single IT purchase. Manager approval required."
+    elif 'Gaming' in vendor: # If the mock data was from a gaming store
+        risk_score = 90
+        risk_reason = "🚨 HIGH RISK: Gaming-related vendor detected. Non-essential and violates Section 5.2."
     
     return {
         "vendor": vendor,
@@ -148,8 +184,17 @@ def get_financial_advice_and_prediction(df_history):
     }
 
 # --- APPLICATION INTERFACE (Low-Code) ---
-st.title("🤖 AI Expense Guardian: Audit & Approval")
+
+# --- LOGO & TITLE SECTION (CUSTOM HTML) ---
+# LOGO_URL now contains the Base64 data string
+st.markdown(f"""
+<div class="header-container">
+    <img src="{LOGO_URL}" alt="App Logo" class="logo-img" width="50" height="50">
+    <h1 style='margin: 0; padding: 0;'>AI Expense Guardian: Audit & Approval</h1>
+</div>
+""", unsafe_allow_html=True)
 st.markdown("Automated processing for **OCR, Anomaly Detection, and Auto-Categorization**.")
+
 
 # Initialize or load spending history
 if 'full_history' not in st.session_state:
@@ -184,9 +229,8 @@ with tab1:
     with col1:
         st.subheader("1. Receipt Document Scan")
         if uploaded_file is not None:
-            # Updated to use width='stretch' if necessary, though st.image usually uses use_column_width
-            # adhering to strict user request for replacements where applicable.
-            st.image(uploaded_file, caption='Uploaded Receipt for OCR', use_container_width=True) 
+            # Fixed: width="stretch"
+            st.image(uploaded_file, caption='Uploaded Receipt for OCR', width="stretch")
             
             # Interactive Button (Fixed: width="stretch")
             if st.button("🚀 Run AI Analysis", width="stretch"):
