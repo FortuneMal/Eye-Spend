@@ -132,10 +132,14 @@ def analyze_receipt_with_ai(uploaded_image):
     time.sleep(1.5)
     
     # Mock Response Logic based on "random" to show variety (User's logic)
-    mock_vendors = ["Starbucks Coffee", "Uber Rides", "Gaming Emporium (Casino)", "Office Depot", "Delta Airlines"]
+    mock_vendors = ["Starbucks Coffee", "Uber Rides", "Gaming Emporium (Casino)", "Office Depot", "Delta Airlines", "Global Tech Solutions"]
     vendor = random.choice(mock_vendors)
     amount = round(random.uniform(5.00, 1500.00), 2)
     
+    # Override for specific demo scenarios
+    if vendor == "Global Tech Solutions":
+        amount = 4200.00 # High value demo case
+
     # AI Logic: Flag suspicious items (Anomaly Detection)
     risk_score = 10
     risk_reason = "Standard transaction, category matches vendor."
@@ -151,38 +155,12 @@ def analyze_receipt_with_ai(uploaded_image):
         category = "Meals"
     elif amount > 1000:
         risk_score = 65
-        risk_reason = "Medium Risk: Exceeds $1000 threshold. Manager approval required."
-        category = "Software" if "Office Depot" in vendor else category
-    
-    return {
-        "vendor": vendor,
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "amount": amount,
-        "category": category,
-        "risk_score": risk_score,
-        "risk_reason": risk_reason
-    }
-def analyze_receipt_with_ai(uploaded_image):
-    """
-    Simulates sending the image to an LLM (like Gemini Vision) for OCR and risk analysis.
-    UPDATED: Simulating a HIGH VALUE receipt scan.
-    """
-    import time
-    time.sleep(1.5)
-    
-    # --- MOCK OCR EXTRACTION (Updated for the $4,200 receipt) ---
-    vendor = "Global Tech Solutions"
-    amount = 4200.00  # High amount!
-    category = "IT Infrastructure"
-
-    # --- MOCK ANOMALY DETECTION (AI Logic) ---
-    risk_score = 15
-    risk_reason = "Standard expense."
-
-    # Logic to flag the high amount
-    if amount > 1000:
-        risk_score = 95 # High Risk Score
-        risk_reason = f"🚨 CRITICAL: Expense of ${amount:,.2f} exceeds the $1,000 auto-approval limit. Executive sign-off required."
+        risk_reason = f"Medium Risk: Expense of ${amount:,.2f} exceeds the $1,000 threshold. Manager approval required."
+        if amount > 4000:
+             risk_score = 95
+             risk_reason = f"🚨 CRITICAL: Expense of ${amount:,.2f} exceeds the $1,000 auto-approval limit. Executive sign-off required."
+        
+        category = "IT Infrastructure" if "Global Tech" in vendor else ("Software" if "Office Depot" in vendor else category)
     
     return {
         "vendor": vendor,
@@ -277,6 +255,7 @@ with tab1:
         if uploaded_file is not None:
             # Using use_container_width=True for flexible sizing
             st.image(uploaded_file, caption='Uploaded Receipt for OCR', use_container_width=True)
+            st.success("Receipt uploaded successfully! Ready for analysis.")
             
             # Interactive Button (Fixed: width="stretch")
             if st.button("🚀 Run AI Analysis", use_container_width=True):
