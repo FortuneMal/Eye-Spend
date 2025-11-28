@@ -344,7 +344,7 @@ with tab1:
                 approval_action = "Auto-Reject"
 
             
-            # Summary Card (Styled with custom markdown/HTML)
+            # Summary Card (Styled with custom markdown/HTML) - FIX APPLIED HERE
             st.markdown(f"""
             <div style="background-color: #1f2937; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                 <h3 style='color: #fff; margin-top: 0;'>{status_emoji} {approval_action} Recommendation</h3>
@@ -378,13 +378,13 @@ with tab1:
                 col_btn1, col_btn2 = st.columns([1,1])
                 with col_btn1:
                     if approval_action != "Auto-Reject":
-                        # Fixed: width="stretch"
+                        # Updated to use use_container_width=True
                         st.button("Confirm & Approve", type="primary", use_container_width=True)
                     else:
-                        # Fixed: width="stretch"
+                        # Updated to use use_container_width=True
                         st.button("Flag for Manual Review", type="secondary", use_container_width=True)
                 with col_btn2:
-                    # Fixed: width="stretch"
+                    # Updated to use use_container_width=True
                     st.button("View Audit Log", type="secondary", use_container_width=True)
         else:
             st.info("Analysis results will appear here after running the AI.")
