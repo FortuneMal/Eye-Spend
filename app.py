@@ -321,7 +321,7 @@ with tab1:
         else:
             st.warning("Please upload a receipt image to begin the analysis.")
 
-    # RIGHT COLUMN: Analysis Results
+# RIGHT COLUMN: Analysis Results
     with col2:
         st.subheader("2. Audit & Risk Prediction")
         
@@ -344,28 +344,28 @@ with tab1:
                 approval_action = "Auto-Reject"
 
             
-            # Summary Card (Styled with custom markdown/HTML) - FIX APPLIED HERE
+            # Summary Card (Styled with custom markdown/HTML) - Indentation Fix Applied
             st.markdown(f"""
-            <div style="background-color: #1f2937; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style='color: #fff; margin-top: 0;'>{status_emoji} {approval_action} Recommendation</h3>
-                <p style='font-size: 1.2em;'>
-                    **Vendor:** {latest['vendor']} ({latest['date']})<br>
-                    **Category:** **<span class='risk-medium'>{latest['category']}</span>**<br>
-                </p>
-                <hr style='border-color: #30363d;'>
-                
-                <div style='display: flex; justify-content: space-between;'>
-                    <div style='text-align: center;'>
-                        <p style='margin: 0; font-size: 1em;'>Detected Amount</p>
-                        <p style='margin: 0; font-size: 2.5em; color: #58a6ff;'>${latest['amount']}</p>
-                    </div>
-                    <div style='text-align: center;'>
-                        <p style='margin: 0; font-size: 1em;'>AI Risk Score</p>
-                        <p class='{risk_class}' style='margin: 0; font-size: 2.5em;'>{score}/100</p>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+<div style="background-color: #1f2937; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+    <h3 style='color: #fff; margin-top: 0;'>{status_emoji} {approval_action} Recommendation</h3>
+    <p style='font-size: 1.2em;'>
+        **Vendor:** {latest['vendor']} ({latest['date']})<br>
+        **Category:** **<span class='risk-medium'>{latest['category']}</span>**<br>
+    </p>
+    <hr style='border-color: #30363d;'>
+    
+    <div style='display: flex; justify-content: space-between;'>
+        <div style='text-align: center;'>
+            <p style='margin: 0; font-size: 1em;'>Detected Amount</p>
+            <p style='margin: 0; font-size: 2.5em; color: #58a6ff;'>${latest['amount']}</p>
+        </div>
+        <div style='text-align: center;'>
+            <p style='margin: 0; font-size: 1em;'>AI Risk Score</p>
+            <p class='{risk_class}' style='margin: 0; font-size: 2.5em;'>{score}/100</p>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
             
             # Detailed Risk Breakdown
             with st.expander("Detailed Anomaly Detection Report"):
@@ -378,13 +378,13 @@ with tab1:
                 col_btn1, col_btn2 = st.columns([1,1])
                 with col_btn1:
                     if approval_action != "Auto-Reject":
-                        # Updated to use use_container_width=True
+                        # Enforced use_container_width=True
                         st.button("Confirm & Approve", type="primary", use_container_width=True)
                     else:
-                        # Updated to use use_container_width=True
+                        # Enforced use_container_width=True
                         st.button("Flag for Manual Review", type="secondary", use_container_width=True)
                 with col_btn2:
-                    # Updated to use use_container_width=True
+                    # Enforced use_container_width=True
                     st.button("View Audit Log", type="secondary", use_container_width=True)
         else:
             st.info("Analysis results will appear here after running the AI.")
