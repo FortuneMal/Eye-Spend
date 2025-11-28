@@ -240,7 +240,7 @@ def get_financial_advice_and_prediction(df_history):
 st.markdown(f"""
 <div class="header-container">
     <img src="{LOGO_URL}" alt="App Logo" class="logo-img" width="50" height="50">
-    <h1 style='margin: 0; padding: 0;'>AI Expense Guardian: Audit & Approval</h1>
+    <h1 style='margin: 0; padding: 0;'>AI Expense Guardian</h1>
 </div>
 """, unsafe_allow_html=True)
 st.markdown("Automated processing for **OCR, Anomaly Detection, and Auto-Categorization**.")
