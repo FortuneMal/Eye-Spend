@@ -10,7 +10,8 @@ Project Structure.
 Local Development SetupThe easiest way to run the application locally is using Docker Compose.PrerequisitesDocker and Docker Compose installed.Python 3.9+ (Optional, for running outside Docker).StepsClone the Repository:git clone [YOUR_REPO_URL]
 cd ai-expense-guardian
 Build and Run the Containers:docker-compose up --build
-This command builds the Docker image defined in Dockerfile and starts the application.Access the App:Open your web browser and navigate to:http://localhost:8501 OpenShift DeploymentThis application is configured for deployment on OpenShift, prioritizing security and stability through a non-root user and explicit configurations for proxy environments.1. Image Build & PushEnsure your container image is built and pushed to a registry accessible by your OpenShift cluster (e.g., Quay, GitLab Registry).docker build -t your-registry.io/your-namespace/expense-app:latest .
+This command builds the Docker image defined in Dockerfile and starts the application. OpenShift DeploymentThis application is configured for deployment on OpenShift, prioritizing security and stability through a non-root user and explicit configurations for proxy environments.
+1. Image Build & PushEnsure your container image is built and pushed to a registry accessible by your OpenShift cluster (e.g., Quay, GitLab Registry).docker build -t your-registry.io/your-namespace/expense-app:latest .
 docker push your-registry.io/your-namespace/expense-app:latest
 2. Update and Apply Kubernetes ManifestThe k8s_deployment.yaml contains the Deployment, Service, and Route definitions. 
 IMPORTANT: Before applying, you must update the image: placeholder in k8s_deployment.yaml with your actual registry image path.# Inside k8s_deployment.yaml:
